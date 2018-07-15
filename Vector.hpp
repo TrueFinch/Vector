@@ -10,7 +10,7 @@
 
 namespace tftl {
 /**
- * @brief tftl::Vector is a sequence  container that encapsulates dynamic size arrays
+ * @brief tftl::Vector is a sequence container that encapsulates dynamic size arrays
  *
  * @tparam T The type of the elements.
  * @tparam Allocator An allocator that is used to acquire/release memory
@@ -55,11 +55,11 @@ class Vector {
 
 
   // construct/copy/destroy:
-  Vector() noexcept (noexcept(Allocator())) = default;
+  Vector() noexcept ( noexcept(Allocator()) ) = default;
   explicit Vector( const Allocator& alloc ) noexcept;
   Vector( size_type count, const T& value, const Allocator& alloc = Allocator() );
-  explicit Vector( size_type count, const Allocator& alloc = Allocator() );
-  template< class InputIt >
+  explicit Vector( size_type count, const Allocator& alloc = Allocator()) ;
+  template<class InputIt>
   Vector( InputIt first, InputIt last, const Allocator& alloc = Allocator() );
   Vector( const Vector& other );
   Vector( Vector&& other ) noexcept;
@@ -67,7 +67,7 @@ class Vector {
   Vector( std::initializer_list<T> init, const Allocator& alloc = Allocator() );
 
   ~Vector();
-
+  // Operators and assigment
   Vector& operator=( const Vector& other );
   Vector& operator=(Vector&& other) noexcept(
       std::allocator_traits<Allocator>::propagate_on_container_move_assignment::value
@@ -89,33 +89,33 @@ class Vector {
   reference       operator[]( size_type pos );
   const_reference operator[]( size_type pos ) const;
 
-  reference front();
+  reference       front();
   const_reference front() const;
 
-  reference back();
+  reference       back();
   const_reference back() const;
 
 
   // Data access
-  T* data() noexcept;
-  const T* data() const noexcept;
+  T*        data() noexcept;
+  const T*  data() const noexcept;
 
   // Iterators:
-  iterator begin() noexcept;
-  const_iterator begin() const noexcept;
-  const_iterator cbegin() const noexcept;
+  iterator                begin() noexcept;
+  const_iterator          begin() const noexcept;
+  const_iterator          cbegin() const noexcept;
 
-  iterator end() noexcept;
-  const_iterator end() const noexcept;
-  const_iterator cend() const noexcept;
+  iterator                end() noexcept;
+  const_iterator          end() const noexcept;
+  const_iterator          cend() const noexcept;
 
-  reverse_iterator rbegin() noexcept;
-  const_reverse_iterator rbegin() const noexcept;
-  const_reverse_iterator crbegin() const noexcept;
+  reverse_iterator        rbegin() noexcept;
+  const_reverse_iterator  rbegin() const noexcept;
+  const_reverse_iterator  crbegin() const noexcept;
 
-  reverse_iterator rend() noexcept;
-  const_reverse_iterator rend() const noexcept;
-  const_reverse_iterator crend() const noexcept;
+  reverse_iterator        rend() noexcept;
+  const_reverse_iterator  rend() const noexcept;
+  const_reverse_iterator  crend() const noexcept;
 
   // Capacity
   bool      empty() const noexcept;
@@ -154,8 +154,69 @@ class Vector {
 
   void swap( Vector& other ) noexcept(std::allocator_traits<Allocator>::propagate_on_container_swap::value
       || std::allocator_traits<Allocator>::is_always_equal::value);
+ private:
+  Allocator allocator_; // allocator TODO: replace by my own
+
+
+  pointer head_ = nullptr; //Pointer to the first element of the Vector
+  pointer tail_ = nullptr; //Pointer to the past-the-last element of the Vector
+  pointer peak_ = nullptr; //Pointer to the end of available space of the Vector
+
+  const float vector_growth_factor_ = 2.0;
+
+  //Methods to manipulate with memory by using allocator
+  void reallocate(size_type new_size);
+  void init(iterator start, iterator finish);
+  void deallocate(iterator start, iterator finish);
+
 };
 
 // construct/copy/destroy:
+template<typename T, typename Allocator>
+Vector<T, Allocator>::Vector(const Allocator& alloc) noexcept {//TODO
+   }
+
+template<typename T, typename Allocator>
+Vector<T, Allocator>::Vector(Vector::size_type count, const T& value, const Allocator& alloc) {
+    this->assign(count, value);
+}
+
+template<typename T, typename Allocator>
+Vector<T, Allocator>::Vector(Vector::size_type count, const Allocator& alloc) {
+
+}
+
+template<typename T, typename Allocator>
+template<class InputIt>
+Vector<T, Allocator>::Vector(InputIt first, InputIt last, const Allocator& alloc) {
+  this->assign(first, last);
+}
+
+template<typename T, typename Allocator>
+Vector<T, Allocator>::Vector(const Vector& other) {
+  size_t other_size = other.size();
+  this->reallocate(other_size);
+  for (size_t i = 0; i < other_size; ++i) {
+    this->allocator_.construct(this->head_ + i, other[i]);
+  }
+}
+
+template<typename T, typename Allocator>
+Vector<T, Allocator>::Vector(Vector&& other) noexcept
+: allocator_{other.allocator_}, head_{other.head_}, tail_{other.tail_}, peak_{other.tail_} {
+  other.head_ = other.tail_ = other.peak_ = nullptr;
+}
+
+template<typename T, typename Allocator>
+Vector<T, Allocator>::Vector(Vector&& other, const Allocator& alloc)
+: allocator_{alloc}, head_{other.head_}, tail_{other.tail_}, peak_{other.tail_} {
+  other.head_ = other.tail_ = other.peak_ = nullptr;
+}
+
+template<typename T, typename Allocator>
+Vector<T, Allocator>::Vector(std::initializer_list<T> init, const Allocator& alloc) {
+  assign(init.begin(), init.end());
+}
+
 
 } //namespace truefinch template library
