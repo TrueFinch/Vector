@@ -20,13 +20,17 @@ namespace tftl {
  */
 template<typename T, typename Allocator>
 class Vector;
-} //namespace truefinch template library
 
 template<typename T, typename Allocator>
 bool operator==(const tftl::Vector<T, Allocator>& lhs, const std::vector<T, Allocator>& rhs);
 
 template<typename T, typename Allocator>
 bool operator==(const tftl::Vector<T, Allocator>& lhs, const tftl::Vector<T, Allocator>& rhs);
+
+template<typename T, typename Allocator>
+bool operator<(const tftl::Vector<T, Allocator>& lhs, const tftl::Vector<T, Allocator>& rhs);
+
+} //namespace truefinch template library
 
 namespace tftl {
 /**
@@ -74,7 +78,7 @@ class Vector {
   Vector& operator=( std::initializer_list<T> ilist );
 
   void assign( size_type count, const T& value );
-  template< class InputIt >
+  template< class InputIt, class = typename std::enable_if <!std::is_integral <InputIt>::value>::type >
   void assign( InputIt first, InputIt last );
   void assign( std::initializer_list<T> ilist );
 
@@ -225,9 +229,9 @@ Vector<T, Allocator>::~Vector() {
   this->allocator_.deallocate(head_, this->capacity());
 }
 
-// Operators and assigment
+// Operators and assigment:
 template<typename T, typename Allocator>
-Vector& Vector<T, Allocator>::operator=(const Vector& other) {
+Vector<T, Allocator>& Vector<T, Allocator>::operator=(const Vector& other) {
   if (this != &other) {
     this->erase(this->begin(), this->end());
     if (other.size() > capacity()) {
@@ -244,7 +248,7 @@ Vector& Vector<T, Allocator>::operator=(const Vector& other) {
 }
 
 template<typename T, typename Allocator>
-Vector& Vector<T, Allocator>::operator=(Vector&& other) noexcept(
+Vector<T, Allocator>& Vector<T, Allocator>::operator=(Vector&& other) noexcept(
 std::allocator_traits<Allocator>::propagate_on_container_move_assignment::value
     || std::allocator_traits<Allocator>::is_always_equal::value) {
   if (this == &other) {
@@ -256,7 +260,7 @@ std::allocator_traits<Allocator>::propagate_on_container_move_assignment::value
 }
 
 template<typename T, typename Allocator>
-Vector& Vector<T, Allocator>::operator=(std::initializer_list<T> ilist) {
+Vector<T, Allocator>& Vector<T, Allocator>::operator=(std::initializer_list<T> ilist) {
   this->assign(ilist.begin(), ilist.end());
   return *this;
 }
@@ -278,10 +282,10 @@ void Vector<T, Allocator>::assign(Vector::size_type count, const T& value) {
 }
 
 template<typename T, typename Allocator>
-template<class InputIt>
+template<class InputIt, typename isIterator>
 void Vector<T, Allocator>::assign(InputIt first, InputIt last) {
   this->erase(this->begin(), this->end());
-  typename iterator::difference_type count = labs(std::distance(first, last));
+  typename Vector<T, Allocator>::iterator::difference_type count = std::distance(first, last);
 
   if (this->capacity() < count) {
     this->reallocate(count);
@@ -300,13 +304,13 @@ void Vector<T, Allocator>::assign(std::initializer_list<T> ilist) {
 }
 
 template<typename T, typename Allocator>
-allocator_type Vector<T, Allocator>::get_allocator() const {
+typename Vector<T, Allocator>::allocator_type Vector<T, Allocator>::get_allocator() const {
   return this->allocator_;
 }
 
-// Element access
+// Element access:
 template<typename T, typename Allocator>
-reference Vector<T, Allocator>::at(Vector::size_type pos) {
+typename Vector<T, Allocator>::reference Vector<T, Allocator>::at(Vector::size_type pos) {
   if (pos >= this->size()) {
     throw std::out_of_range("tftl::Vector::at: accessed element out of range");
   }
@@ -314,7 +318,7 @@ reference Vector<T, Allocator>::at(Vector::size_type pos) {
 }
 
 template<typename T, typename Allocator>
-const_reference Vector<T, Allocator>::at(Vector::size_type pos) const {
+typename Vector<T, Allocator>::const_reference Vector<T, Allocator>::at(Vector::size_type pos) const {
   if (pos >= this->size()) {
     throw std::out_of_range("tftl::Vector::at: accessed element out of range");
   }
@@ -322,120 +326,120 @@ const_reference Vector<T, Allocator>::at(Vector::size_type pos) const {
 }
 
 template<typename T, typename Allocator>
-reference Vector<T, Allocator>::operator[](Vector::size_type pos) {
+typename Vector<T, Allocator>::reference Vector<T, Allocator>::operator[](Vector::size_type pos) {
   return this->head_[pos];
 }
 
 template<typename T, typename Allocator>
-const_reference Vector<T, Allocator>::operator[](Vector::size_type pos) const {
+typename Vector<T, Allocator>::const_reference Vector<T, Allocator>::operator[](Vector::size_type pos) const {
   return this->head_[pos];
 }
 
 template<typename T, typename Allocator>
-reference Vector<T, Allocator>::front() {
+typename Vector<T, Allocator>::reference Vector<T, Allocator>::front() {
   return *(this->head_);
 }
 
 template<typename T, typename Allocator>
-const_reference Vector<T, Allocator>::front() const {
+typename Vector<T, Allocator>::const_reference Vector<T, Allocator>::front() const {
   return *(this->head_);
 }
 
 template<typename T, typename Allocator>
-reference Vector<T, Allocator>::back() {
+typename Vector<T, Allocator>::reference Vector<T, Allocator>::back() {
   return *(this->tail_);
 }
 
 template<typename T, typename Allocator>
-const_reference Vector<T, Allocator>::back() const {
+typename Vector<T, Allocator>::const_reference Vector<T, Allocator>::back() const {
   return *(this->tail_);
 }
 
-// Data access
+// Data access:
 template<typename T, typename Allocator>
 T* Vector<T, Allocator>::data() noexcept {
-  return head_;
+  return this->head_;
 }
 
 template<typename T, typename Allocator>
 const T* Vector<T, Allocator>::data() const noexcept {
-  return head_;
+  return this->head_;
 }
 
-// Iterators
+// Iterators:
 template<typename T, typename Allocator>
-Vector::iterator Vector<T, Allocator>::begin() noexcept {
-  return tftl::Vector::iterator(this->head_);
-}
-
-template<typename T, typename Allocator>
-Vector::const_iterator Vector<T, Allocator>::begin() const noexcept {
-  return tftl::Vector::const_iterator(this->head_);
+typename Vector<T, Allocator>::iterator Vector<T, Allocator>::begin() noexcept {
+  return tftl::Vector<T, Allocator>::iterator(this->head_);
 }
 
 template<typename T, typename Allocator>
-Vector::const_iterator Vector<T, Allocator>::cbegin() const noexcept {
-  return tftl::Vector::const_iterator(this->head_);
+typename Vector<T, Allocator>::const_iterator Vector<T, Allocator>::begin() const noexcept {
+  return tftl::Vector<T, Allocator>::const_iterator(this->head_);
 }
 
 template<typename T, typename Allocator>
-Vector::iterator Vector<T, Allocator>::end() noexcept {
-  return tftl::Vector::iterator(this->tail_);
+typename Vector<T, Allocator>::const_iterator Vector<T, Allocator>::cbegin() const noexcept {
+  return tftl::Vector<T, Allocator>::const_iterator(this->head_);
 }
 
 template<typename T, typename Allocator>
-Vector::const_iterator Vector<T, Allocator>::end() const noexcept {
-  return tftl::Vector::const_iterator(this->tail_);
+typename Vector<T, Allocator>::iterator Vector<T, Allocator>::end() noexcept {
+  return tftl::Vector<T, Allocator>::iterator(this->tail_);
 }
 
 template<typename T, typename Allocator>
-Vector::const_iterator Vector<T, Allocator>::cend() const noexcept {
-  return tftl::Vector::const_iterator(this->tail_);
+typename Vector<T, Allocator>::const_iterator Vector<T, Allocator>::end() const noexcept {
+  return tftl::Vector<T, Allocator>::const_iterator(this->tail_);
 }
 
 template<typename T, typename Allocator>
-Vector::reverse_iterator Vector<T, Allocator>::rbegin() noexcept {
-  return tftl::Vector::reverse_iterator(this->head_ + this->size());
+typename Vector<T, Allocator>::const_iterator Vector<T, Allocator>::cend() const noexcept {
+  return tftl::Vector<T, Allocator>::const_iterator(this->tail_);
 }
 
 template<typename T, typename Allocator>
-Vector::const_reverse_iterator Vector<T, Allocator>::rbegin() const noexcept {
-  return tftl::Vector::const_reverse_iterator(this->tail_ - 1);
+typename Vector<T, Allocator>::reverse_iterator Vector<T, Allocator>::rbegin() noexcept {
+  return tftl::Vector<T, Allocator>::reverse_iterator(this->head_ + this->size());
 }
 
 template<typename T, typename Allocator>
-Vector::const_reverse_iterator Vector<T, Allocator>::crbegin() const noexcept {
-  return tftl::Vector::const_reverse_iterator(this->tail_ - 1);
+typename Vector<T, Allocator>::const_reverse_iterator Vector<T, Allocator>::rbegin() const noexcept {
+  return tftl::Vector<T, Allocator>::const_reverse_iterator(this->tail_ - 1);
 }
 
 template<typename T, typename Allocator>
-Vector::reverse_iterator Vector<T, Allocator>::rend() noexcept {
-  return tftl::Vector::reverse_iterator(this->head_ - 1);
+typename Vector<T, Allocator>::const_reverse_iterator Vector<T, Allocator>::crbegin() const noexcept {
+  return tftl::Vector<T, Allocator>::const_reverse_iterator(this->tail_ - 1);
 }
 
 template<typename T, typename Allocator>
-Vector::const_reverse_iterator Vector<T, Allocator>::rend() const noexcept {
-  return tftl::Vector::const_reverse_iterator(this->head_ - 1);
+typename Vector<T, Allocator>::reverse_iterator Vector<T, Allocator>::rend() noexcept {
+  return tftl::Vector<T, Allocator>::reverse_iterator(this->head_ - 1);
 }
 
 template<typename T, typename Allocator>
-Vector::const_reverse_iterator Vector<T, Allocator>::crend() const noexcept {
-  return tftl::Vector::const_reverse_iterator(this->head_ - 1);
+typename Vector<T, Allocator>::const_reverse_iterator Vector<T, Allocator>::rend() const noexcept {
+  return tftl::Vector<T, Allocator>::const_reverse_iterator(this->head_ - 1);
 }
 
-// Capacity
+template<typename T, typename Allocator>
+typename Vector<T, Allocator>::const_reverse_iterator Vector<T, Allocator>::crend() const noexcept {
+  return tftl::Vector<T, Allocator>::const_reverse_iterator(this->head_ - 1);
+}
+
+// Capacity:
 template<typename T, typename Allocator>
 bool Vector<T, Allocator>::empty() const noexcept {
   return this->size() == 0;
 }
 
 template<typename T, typename Allocator>
-Vector::size_type Vector<T, Allocator>::size() const noexcept {
+typename Vector<T, Allocator>::size_type Vector<T, Allocator>::size() const noexcept {
   return this->tail_ - this->head_;
 }
 
 template<typename T, typename Allocator>
-Vector::size_type Vector<T, Allocator>::max_size() const noexcept {
+typename Vector<T, Allocator>::size_type Vector<T, Allocator>::max_size() const noexcept {
   return static_cast<size_type>(SIZE_MAX / sizeof(T));
 }
 
@@ -450,7 +454,7 @@ void Vector<T, Allocator>::reserve(Vector::size_type new_cap) {
 }
 
 template<typename T, typename Allocator>
-Vector::size_type Vector<T, Allocator>::capacity() const noexcept {
+typename Vector<T, Allocator>::size_type Vector<T, Allocator>::capacity() const noexcept {
   return this->peak_ - this->head_;
 }
 
@@ -459,5 +463,96 @@ void Vector<T, Allocator>::shrink_to_fit() {
   //TODO: do it later,
 }
 
+// Modifier:
+template<typename T, typename Allocator>
+void Vector<T, Allocator>::clear() noexcept {
+  this->allocator_.deallocate(this->head_, this->capacity());
+  this->head_ = this->tail_ = this->peak_ = nullptr;
+}
+
+template<typename T, typename Allocator>
+typename Vector<T, Allocator>::iterator Vector<T, Allocator>::insert(const_iterator pos, const T& value) {
+  size_type index = pos - this->begin();
+  if (size() + 1 > this->capacity()) {
+    this->reallocate(size() + 1);
+  }
+
+  auto iter = this->begin() + index;
+  std::copy_backward(iter, this->end(), iter + this->size() - index + 1);
+  *iter = value;
+  ++(this->tail_);
+  return iter;
+}
+
+template<typename T, typename Allocator>
+typename Vector<T, Allocator>::iterator Vector<T, Allocator>::insert(const_iterator pos, T&& value) {
+  size_type index = pos - this->begin();
+
+  size_type newSize = this->size() + 1;
+  if ((newSize) > this->capacity()) {
+    this->reallocate(newSize);
+  }
+
+  auto iter = this->begin() + index;
+  std::copy_backward(iter, this->end(), this->end() + 1);
+  *iter = value;
+  ++(this->tail_);
+  return iter;
+}
+
+template<typename T, typename Allocator>
+typename Vector<T, Allocator>::iterator Vector<T, Allocator>::insert(const_iterator pos,
+                                                                     size_type count,
+                                                                     const T& value) {
+  size_type index = pos - begin();
+
+  size_type newSize = size() + count;
+  if (newSize > capacity()) {
+    reallocate(newSize);
+  }
+
+  auto iter = begin() + index;
+  std::copy_backward(iter, end(), end() + count);
+  std::fill(iter, iter + count, value);
+  this->tail_ = this->head_ + newSize;
+  return iter;
+}
+
+template<typename T, typename Allocator>
+template<class InputIt>
+Vector::iterator Vector<T, Allocator>::insert(const_iterator pos, InputIt first, InputIt last) {
+  difference_type count = std::distance(first, last);
+  size_type index = pos - this->begin();
+
+  size_type newSize = this->size() + count;
+  if (newSize > this->capacity()) {
+    this->reallocate(newSize);
+  }
+
+  auto iter = this->begin() + index;
+  std::copy_backward(iter, this->end(), this->end() + count);
+  std::copy(first, last, iter);
+  this->tail_ = this->head_ + newSize;
+  return iter;
+}
+
+template<typename T, typename Allocator>
+Vector::iterator Vector<T, Allocator>::insert(const_iterator pos, std::initializer_list<T> ilist) {
+  return this->insert(pos, ilist.begin(), ilist.end());
+}
+
+template<typename T, typename Allocator>
+template<class... Args>
+Vector::iterator Vector<T, Allocator>::emplace(const_iterator pos, Args&& ... args) {
+  size_type index = pos - begin();
+  if (size() + 1 > capacity()) {
+    reallocate(size() + 1);
+  }
+
+  auto iter = begin() + index;
+  std::copy_backward(iter, end(), end() + 1);
+  allocator_.construct(&*iter, std::forward<Args>(args)...);
+  return iter;
+}
 
 } //namespace truefinch template library

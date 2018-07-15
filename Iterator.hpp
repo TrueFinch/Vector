@@ -14,7 +14,7 @@ class Iterator;
 //Do redefine for std algorithms compatibility
 namespace std {
 template<typename T>
-struct Iterator_traits<tftl::Iterator<T>> {
+struct iterator_traits<tftl::Iterator<T>> {
   // @formatter:off
   typedef std::ptrdiff_t                  difference_type;
   typedef T                               value_type;
@@ -30,7 +30,7 @@ template<typename T>
 class Iterator {
  public:
   // @formatter:off
-  typedef typename std::Iterator_traits <Iterator <T>> traits;
+  typedef typename std::iterator_traits <Iterator <T>> traits;
   typedef typename traits::difference_type             difference_type;
   typedef typename traits::value_type                  value_type;
   typedef typename traits::pointer                     pointer;
