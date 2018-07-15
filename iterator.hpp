@@ -8,13 +8,13 @@
 
 namespace tftl {
 template<typename T>
-class Iterator;
+class iterator;
 } // namespace truefinch template library
 
 //Do redefine for std algorithms compatibility
 namespace std {
 template<typename T>
-struct iterator_traits<tftl::Iterator<T>> {
+struct iterator_traits<tftl::iterator<T>> {
   // @formatter:off
   typedef std::ptrdiff_t                  difference_type;
   typedef T                               value_type;
@@ -27,10 +27,10 @@ struct iterator_traits<tftl::Iterator<T>> {
 
 namespace tftl {
 template<typename T>
-class Iterator {
+class iterator {
  public:
   // @formatter:off
-  typedef typename std::iterator_traits <Iterator <T>> traits;
+  typedef typename std::iterator_traits <iterator <T>> traits;
   typedef typename traits::difference_type             difference_type;
   typedef typename traits::value_type                  value_type;
   typedef typename traits::pointer                     pointer;
@@ -39,155 +39,155 @@ class Iterator {
   //@ formatter:on
 
   //constructors
-  explicit Iterator(pointer ptr = nullptr) : pointer_( ptr ) {};
+  explicit iterator(pointer ptr = nullptr) : pointer_( ptr ) {};
 
-  Iterator(const Iterator& other) {};
+  iterator(const iterator& other) : pointer_{other.pointer_} {};
 
-  Iterator&      operator=(const Iterator&);
-  Iterator&      operator++();
-  Iterator&      operator--();
-  const Iterator operator++(int);
-  const Iterator operator--(int);
-  Iterator&      operator+=(difference_type);
-  Iterator&      operator-=(difference_type);
+  iterator&      operator=(const iterator&);
+  iterator&      operator++();
+  iterator&      operator--();
+  const iterator operator++(int);
+  const iterator operator--(int);
+  iterator&      operator+=(difference_type);
+  iterator&      operator-=(difference_type);
 
-  difference_type operator-(const Iterator&) const;
-  Iterator        operator+(difference_type) const;
-  Iterator        operator-(difference_type) const;
+  difference_type operator-(const iterator&) const;
+  iterator        operator+(difference_type) const;
+  iterator        operator-(difference_type) const;
 
   reference operator*() const;
   pointer   operator->() const;
   reference operator[](difference_type) const;
 
-  bool operator==(const Iterator&) const;
-  bool operator!=(const Iterator&) const;
-  bool operator>(const Iterator&) const;
-  bool operator<(const Iterator&) const;
-  bool operator>=(const Iterator&) const;
-  bool operator<=(const Iterator&) const;
+  bool operator==(const iterator&) const;
+  bool operator!=(const iterator&) const;
+  bool operator>(const iterator&) const;
+  bool operator<(const iterator&) const;
+  bool operator>=(const iterator&) const;
+  bool operator<=(const iterator&) const;
 
  private:
   pointer pointer_;
 };
 template <typename T>
-Iterator <T>& Iterator <T>::operator=(const Iterator& other)
+iterator <T>& iterator <T>::operator=(const iterator& other)
 {
   pointer_ = other.pointer_;
   return *this;
 }
 
 template <typename T>
-Iterator <T>& Iterator <T>::operator++()
+iterator <T>& iterator <T>::operator++()
 {
   ++pointer_;
   return *this;
 }
 
 template <typename T>
-Iterator <T>& Iterator <T>::operator--()
+iterator <T>& iterator <T>::operator--()
 {
   --pointer_;
   return *this;
 }
 
 template <typename T>
-const Iterator <T> Iterator <T>::operator++(int)
+const iterator <T> iterator <T>::operator++(int)
 {
-  Iterator& foo( *this );
+  iterator& foo( *this );
   ++pointer_;
   return foo;
 }
 
 template <typename T>
-const Iterator <T> Iterator <T>::operator--(int)
+const iterator <T> iterator <T>::operator--(int)
 {
-  Iterator foo( *this );
+  iterator foo( *this );
   --pointer_;
   return foo;
 }
 
 template <typename T>
-Iterator <T>& Iterator <T>::operator+=(difference_type n)
+iterator <T>& iterator <T>::operator+=(difference_type n)
 {
   pointer_ += n;
   return *this;
 }
 
 template <typename T>
-Iterator <T>& Iterator <T>::operator-=(difference_type n)
+iterator <T>& iterator <T>::operator-=(difference_type n)
 {
   pointer_ -= n;
   return *this;
 }
 
 template <typename T>
-typename Iterator <T>::difference_type Iterator <T>::operator-(const Iterator& other) const
+typename iterator <T>::difference_type iterator <T>::operator-(const iterator& other) const
 {
   return pointer_ - other.pointer_;
 }
 
 template <typename T>
-Iterator <T> Iterator <T>::operator+(difference_type n) const
+iterator <T> iterator <T>::operator+(difference_type n) const
 {
-  return Iterator( pointer_ + n );
+  return iterator( pointer_ + n );
 }
 
 template <typename T>
-Iterator <T> Iterator <T>::operator-(difference_type n) const
+iterator <T> iterator <T>::operator-(difference_type n) const
 {
-  return Iterator( pointer_ - n );
+  return iterator( pointer_ - n );
 }
 
 template <typename T>
-typename Iterator <T>::reference Iterator <T>::operator[](difference_type i) const
+typename iterator <T>::reference iterator <T>::operator[](difference_type i) const
 {
   return pointer_[i];
 }
 
 template <typename T>
-typename Iterator <T>::reference Iterator <T>::operator*() const
+typename iterator <T>::reference iterator <T>::operator*() const
 {
   return *pointer_;
 }
 
 template <typename T>
-typename Iterator <T>::pointer Iterator <T>::operator->() const
+typename iterator <T>::pointer iterator <T>::operator->() const
 {
   return pointer_;
 }
 
 template <typename T>
-bool Iterator <T>::operator==(const Iterator& other) const
+bool iterator <T>::operator==(const iterator& other) const
 {
   return pointer_ == other.pointer_;
 }
 
 template <typename T>
-bool Iterator <T>::operator!=(const Iterator& other) const
+bool iterator <T>::operator!=(const iterator& other) const
 {
   return !(*this == other);
 }
 
 template <typename T>
-bool Iterator <T>::operator<=(const Iterator& other) const
+bool iterator <T>::operator<=(const iterator& other) const
 {
   return pointer_ <= other.pointer_;
 }
 
 template <typename T>
-bool Iterator <T>::operator>=(const Iterator& other) const
+bool iterator <T>::operator>=(const iterator& other) const
 {
   return pointer_ >= other.pointer_;
 }
 
 template <typename T>
-bool Iterator <T>::operator<(const Iterator& other) const
+bool iterator <T>::operator<(const iterator& other) const
 {
   return pointer_ < other.pointer_;
 }
 
 template <typename T>
-bool Iterator <T>::operator>(const Iterator& other) const
+bool iterator <T>::operator>(const iterator& other) const
 {
   return pointer_ > other.pointer_;
 }
