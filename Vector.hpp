@@ -218,5 +218,12 @@ Vector<T, Allocator>::Vector(std::initializer_list<T> init, const Allocator& all
   assign(init.begin(), init.end());
 }
 
+template<typename T, typename Allocator>
+Vector<T, Allocator>::~Vector() {
+  this->deallocate(this->begin(), this->end());
+  this->allocator_.deallocate(head_, this->capacity());
+}
+
+
 
 } //namespace truefinch template library
