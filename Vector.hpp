@@ -362,4 +362,65 @@ const T* Vector<T, Allocator>::data() const noexcept {
   return head_;
 }
 
+// Iterators
+template<typename T, typename Allocator>
+Vector::iterator Vector<T, Allocator>::begin() noexcept {
+  return tftl::Vector::iterator(this->head_);
+}
+
+template<typename T, typename Allocator>
+Vector::const_iterator Vector<T, Allocator>::begin() const noexcept {
+  return tftl::Vector::const_iterator(this->head_);
+}
+
+template<typename T, typename Allocator>
+Vector::const_iterator Vector<T, Allocator>::cbegin() const noexcept {
+  return tftl::Vector::const_iterator(this->head_);
+}
+
+template<typename T, typename Allocator>
+Vector::iterator Vector<T, Allocator>::end() noexcept {
+  return tftl::Vector::iterator(this->tail_);
+}
+
+template<typename T, typename Allocator>
+Vector::const_iterator Vector<T, Allocator>::end() const noexcept {
+  return tftl::Vector::const_iterator(this->tail_);
+}
+
+template<typename T, typename Allocator>
+Vector::const_iterator Vector<T, Allocator>::cend() const noexcept {
+  return tftl::Vector::const_iterator(this->tail_);
+}
+
+template<typename T, typename Allocator>
+Vector::reverse_iterator Vector<T, Allocator>::rbegin() noexcept {
+  return tftl::Vector::reverse_iterator(this->head_ + this->size());
+}
+
+template<typename T, typename Allocator>
+Vector::const_reverse_iterator Vector<T, Allocator>::rbegin() const noexcept {
+  return tftl::Vector::const_reverse_iterator(this->tail_ - 1);
+}
+
+template<typename T, typename Allocator>
+Vector::const_reverse_iterator Vector<T, Allocator>::crbegin() const noexcept {
+  return tftl::Vector::const_reverse_iterator(this->tail_ - 1);
+}
+
+template<typename T, typename Allocator>
+Vector::reverse_iterator Vector<T, Allocator>::rend() noexcept {
+  return tftl::Vector::reverse_iterator(this->head_ - 1);
+}
+
+template<typename T, typename Allocator>
+Vector::const_reverse_iterator Vector<T, Allocator>::rend() const noexcept {
+  return tftl::Vector::const_reverse_iterator(this->head_ - 1);
+}
+
+template<typename T, typename Allocator>
+Vector::const_reverse_iterator Vector<T, Allocator>::crend() const noexcept {
+  return tftl::Vector::const_reverse_iterator(this->head_ - 1);
+}
+
 } //namespace truefinch template library
