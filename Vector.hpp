@@ -67,7 +67,7 @@ class Vector {
   Vector( std::initializer_list<T> init, const Allocator& alloc = Allocator() );
 
   ~Vector();
-  // Operators and assigment
+  // Operators and assignment
   Vector& operator=( const Vector& other );
   Vector& operator=(Vector&& other) noexcept(
       std::allocator_traits<Allocator>::propagate_on_container_move_assignment::value
@@ -194,9 +194,9 @@ Vector<T, Allocator>::Vector(InputIt first, InputIt last, const Allocator& alloc
 
 template<typename T, typename Allocator>
 Vector<T, Allocator>::Vector(const Vector& other) {
-  size_t other_size = other.size();
+  size_type other_size = other.size();
   this->reallocate(other_size);
-  for (size_t i = 0; i < other_size; ++i) {
+  for (size_type i = 0; i < other_size; ++i) {
     this->allocator_.construct(this->head_ + i, other[i]);
   }
 }
@@ -233,7 +233,7 @@ Vector& Vector<T, Allocator>::operator=(const Vector& other) {
       reallocate(other.size());
     }
 
-    for (size_t i = 0; i < other.size(); ++i) {
+    for (size_type i = 0; i < other.size(); ++i) {
       this->allocator_.construct(this->head_ + i, other[i]);
     }
 
@@ -298,5 +298,56 @@ void Vector<T, Allocator>::assign(std::initializer_list<T> ilist) {
   this->assign(ilist.begin(), ilist.end());
 }
 
+template<typename T, typename Allocator>
+allocator_type Vector<T, Allocator>::get_allocator() const {
+  return this->allocator_;
+}
+
+// Element access
+template<typename T, typename Allocator>
+reference Vector<T, Allocator>::at(Vector::size_type pos) {
+  if (pos >= this->size()) {
+    throw std::out_of_range("tftl::Vector::at: accessed element out of range");
+  }
+  return this->head_[pos];
+}
+
+template<typename T, typename Allocator>
+const_reference Vector<T, Allocator>::at(Vector::size_type pos) const {
+  if (pos >= this->size()) {
+    throw std::out_of_range("tftl::Vector::at: accessed element out of range");
+  }
+  return this->head_[pos];
+}
+
+template<typename T, typename Allocator>
+reference Vector<T, Allocator>::operator[](Vector::size_type pos) {
+  return this->head_[pos];
+}
+
+template<typename T, typename Allocator>
+const_reference Vector<T, Allocator>::operator[](Vector::size_type pos) const {
+  return this->head_[pos];
+}
+
+template<typename T, typename Allocator>
+reference Vector<T, Allocator>::front() {
+  return *(this->head_);
+}
+
+template<typename T, typename Allocator>
+const_reference Vector<T, Allocator>::front() const {
+  return *(this->head_);
+}
+
+template<typename T, typename Allocator>
+reference Vector<T, Allocator>::back() {
+  return *(this->tail_);
+}
+
+template<typename T, typename Allocator>
+const_reference Vector<T, Allocator>::back() const {
+  return *(this->tail_);
+}
 
 } //namespace truefinch template library
