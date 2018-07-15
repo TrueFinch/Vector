@@ -224,6 +224,79 @@ Vector<T, Allocator>::~Vector() {
   this->allocator_.deallocate(head_, this->capacity());
 }
 
+// Operators and assigment
+template<typename T, typename Allocator>
+Vector& Vector<T, Allocator>::operator=(const Vector& other) {
+  if (this != &other) {
+    this->erase(this->begin(), this->end());
+    if (other.size() >capacity()) {
+      reallocate(other.size());
+    }
+
+    for (size_t i = 0; i < other.size(); ++i) {
+      this->allocator_.construct(this->head_ + i, other[i]);
+    }
+
+    this->peak_ = this->head_ + other.size();
+  }
+  return *this;
+}
+
+template<typename T, typename Allocator>
+Vector& Vector<T, Allocator>::operator=(Vector&& other) noexcept(
+std::allocator_traits<Allocator>::propagate_on_container_move_assignment::value
+    || std::allocator_traits<Allocator>::is_always_equal::value) {
+  if (this == &other) {
+    return *this;
+  }
+  this->clear();
+  this->swap(other);
+  return *this;
+}
+
+template<typename T, typename Allocator>
+Vector& Vector<T, Allocator>::operator=(std::initializer_list<T> ilist) {
+  this->assign(ilist.begin(), ilist.end());
+  return *this;
+}
+
+// Replaces the contents with count copies of value value
+template<typename T, typename Allocator>
+void Vector<T, Allocator>::assign(Vector::size_type count, const T& value) {
+  this->erase(this->begin(), end());
+
+  if (count > capacity()) {
+    reallocate(count);
+  }
+
+  for (size_type i = 0; i < count; ++i) {
+    allocator_.construct(this->head_ + i, value);
+  }
+
+  this->tail_ = this->head_ + count;
+}
+
+template<typename T, typename Allocator>
+template<class InputIt>
+void Vector<T, Allocator>::assign(InputIt first, InputIt last) {
+  this->erase(this->begin(), this->end());
+  typename iterator::difference_type count = labs(std::distance(first, last));
+
+  if (this->capacity() < count) {
+    this->reallocate(count);
+  }
+
+  for (auto it = this->begin(); first != last; ++it, ++first) {
+    this->allocator_.construct(&*it, value_type(*first));
+  }
+
+  this->tail_ = this->head_ + count;
+}
+
+template<typename T, typename Allocator>
+void Vector<T, Allocator>::assign(std::initializer_list<T> ilist) {
+  this->assign(ilist.begin(), ilist.end());
+}
 
 
 } //namespace truefinch template library
