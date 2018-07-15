@@ -327,22 +327,6 @@ TEST_CASE("Vector modifications") {
     tftl::vector<int>::value_type a = *(result.emplace(result.begin() + 1, 4));
     REQUIRE(a == expected);
   }
-
-//  SECTION ("Emplace struct without copy constructor") {
-//    struct NoCopy
-//    {
-//      NoCopy() = default;
-//      NoCopy(const NoCopy&) = delete;
-//      NoCopy(NoCopy&&) = default;
-//
-//    };
-//    std::vector<NoCopy> expected;
-//    expected.emplace_back(NoCopy());
-//
-//    tftl::vector<NoCopy> result;
-//    result.emplace_back(NoCopy());
-//  }
-
 }
 
 TEST_CASE("Vector exceptions") {
@@ -516,11 +500,11 @@ TEST_CASE("Iterator tests") {
   }
 }
 
-TEST_CASE("Emplace elements") {
+TEST_CASE("Modifier elements methods") {
   SECTION("Emplace in the head") {
     std::vector<int> expected = {9, 1, 2, 3};
     tftl::vector<int> result = {1, 2, 3};
-    result.emplace(result.begin(), 9);
+    result.emplace(result.cbegin(), 9);
     REQUIRE(result.size() == expected.size());
     REQUIRE(result[0] == expected[0]);
   }
