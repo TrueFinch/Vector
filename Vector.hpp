@@ -36,8 +36,8 @@ namespace tftl {
  */
 template<typename T, typename Allocator = std::allocator<T>>
 class Vector {
- public:
   // @formatter:off
+ public:
   ///This is Member types
   typedef T                                                           value_type;
   typedef Allocator                                                   allocator_type;
@@ -51,8 +51,6 @@ class Vector {
   typedef const tftl::Iterator <value_type>                           const_iterator;
   typedef std::reverse_iterator <iterator>                            reverse_iterator;
   typedef std::reverse_iterator <const_iterator>                      const_reverse_iterator;
-  //@ formatter:on
-
 
   // construct/copy/destroy:
   Vector() noexcept ( noexcept(Allocator()) ) = default;
@@ -67,7 +65,8 @@ class Vector {
   Vector( std::initializer_list<T> init, const Allocator& alloc = Allocator() );
 
   ~Vector();
-  // Operators and assignment
+
+  // Operators and assignment:
   Vector& operator=( const Vector& other );
   Vector& operator=(Vector&& other) noexcept(
       std::allocator_traits<Allocator>::propagate_on_container_move_assignment::value
@@ -82,7 +81,7 @@ class Vector {
   allocator_type get_allocator() const;
 
 
-  // Element access
+  // Element access:
   reference       at( size_type pos );
   const_reference at( size_type pos ) const;
 
@@ -96,7 +95,7 @@ class Vector {
   const_reference back() const;
 
 
-  // Data access
+  // Data access:
   T*        data() noexcept;
   const T*  data() const noexcept;
 
@@ -117,7 +116,7 @@ class Vector {
   const_reverse_iterator  rend() const noexcept;
   const_reverse_iterator  crend() const noexcept;
 
-  // Capacity
+  // Capacity:
   bool      empty() const noexcept;
   size_type size() const noexcept;
   size_type max_size() const noexcept;
@@ -125,35 +124,36 @@ class Vector {
   size_type capacity() const noexcept;
   void      shrink_to_fit();
 
-  // Modifiers
+  // Modifiers:
   void clear() noexcept;
 
-  iterator insert( const_iterator pos, const T& value );
-  iterator insert( const_iterator pos, T&& value );
-  iterator insert( const_iterator pos, size_type count, const T& value );
+  iterator  insert( const_iterator pos, const T& value );
+  iterator  insert( const_iterator pos, T&& value );
+  iterator  insert( const_iterator pos, size_type count, const T& value );
   template< class InputIt >
-  iterator insert( const_iterator pos, InputIt first, InputIt last );
-  iterator insert( const_iterator pos, std::initializer_list<T> ilist );
+  iterator  insert( const_iterator pos, InputIt first, InputIt last );
+  iterator  insert( const_iterator pos, std::initializer_list<T> ilist );
 
   template< class... Args >
-  iterator emplace( const_iterator pos, Args&&... args );
+  iterator  emplace( const_iterator pos, Args&&... args );
 
-  iterator erase( const_iterator pos );
-  iterator erase( const_iterator first, const_iterator last );
+  iterator  erase( const_iterator pos );
+  iterator  erase( const_iterator first, const_iterator last );
 
-  void push_back( const T& value );
-  void push_back( T&& value );
+  void      push_back( const T& value );
+  void      push_back( T&& value );
 
   template< class... Args >
   reference emplace_back( Args&&... args );
 
-  void pop_back();
+  void      pop_back();
 
-  void resize( size_type count );
-  void resize( size_type count, const value_type& value );
+  void      resize( size_type count );
+  void      resize( size_type count, const value_type& value );
 
-  void swap( Vector& other ) noexcept(std::allocator_traits<Allocator>::propagate_on_container_swap::value
+  void      swap( Vector& other ) noexcept(std::allocator_traits<Allocator>::propagate_on_container_swap::value
       || std::allocator_traits<Allocator>::is_always_equal::value);
+
  private:
   Allocator allocator_; // allocator TODO: replace by my own
 
@@ -169,16 +169,17 @@ class Vector {
   void init(iterator start, iterator finish);
   void deallocate(iterator start, iterator finish);
 
+  // @formatter:on
 };
 
 // construct/copy/destroy:
 template<typename T, typename Allocator>
 Vector<T, Allocator>::Vector(const Allocator& alloc) noexcept {//TODO
-   }
+}
 
 template<typename T, typename Allocator>
 Vector<T, Allocator>::Vector(Vector::size_type count, const T& value, const Allocator& alloc) {
-    this->assign(count, value);
+  this->assign(count, value);
 }
 
 template<typename T, typename Allocator>
@@ -203,13 +204,13 @@ Vector<T, Allocator>::Vector(const Vector& other) {
 
 template<typename T, typename Allocator>
 Vector<T, Allocator>::Vector(Vector&& other) noexcept
-: allocator_{other.allocator_}, head_{other.head_}, tail_{other.tail_}, peak_{other.tail_} {
+    : allocator_{other.allocator_}, head_{other.head_}, tail_{other.tail_}, peak_{other.tail_} {
   other.head_ = other.tail_ = other.peak_ = nullptr;
 }
 
 template<typename T, typename Allocator>
 Vector<T, Allocator>::Vector(Vector&& other, const Allocator& alloc)
-: allocator_{alloc}, head_{other.head_}, tail_{other.tail_}, peak_{other.tail_} {
+    : allocator_{alloc}, head_{other.head_}, tail_{other.tail_}, peak_{other.tail_} {
   other.head_ = other.tail_ = other.peak_ = nullptr;
 }
 
@@ -229,7 +230,7 @@ template<typename T, typename Allocator>
 Vector& Vector<T, Allocator>::operator=(const Vector& other) {
   if (this != &other) {
     this->erase(this->begin(), this->end());
-    if (other.size() >capacity()) {
+    if (other.size() > capacity()) {
       reallocate(other.size());
     }
 
@@ -348,6 +349,17 @@ reference Vector<T, Allocator>::back() {
 template<typename T, typename Allocator>
 const_reference Vector<T, Allocator>::back() const {
   return *(this->tail_);
+}
+
+// Data access
+template<typename T, typename Allocator>
+T* Vector<T, Allocator>::data() noexcept {
+  return head_;
+}
+
+template<typename T, typename Allocator>
+const T* Vector<T, Allocator>::data() const noexcept {
+  return head_;
 }
 
 } //namespace truefinch template library
