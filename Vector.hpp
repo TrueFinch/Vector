@@ -423,4 +423,41 @@ Vector::const_reverse_iterator Vector<T, Allocator>::crend() const noexcept {
   return tftl::Vector::const_reverse_iterator(this->head_ - 1);
 }
 
+// Capacity
+template<typename T, typename Allocator>
+bool Vector<T, Allocator>::empty() const noexcept {
+  return this->size() == 0;
+}
+
+template<typename T, typename Allocator>
+Vector::size_type Vector<T, Allocator>::size() const noexcept {
+  return this->tail_ - this->head_;
+}
+
+template<typename T, typename Allocator>
+Vector::size_type Vector<T, Allocator>::max_size() const noexcept {
+  return static_cast<size_type>(SIZE_MAX / sizeof(T));
+}
+
+template<typename T, typename Allocator>
+void Vector<T, Allocator>::reserve(Vector::size_type new_cap) {
+  if (new_cap > this->max_size()) {
+    throw std::length_error("tftl::Vector::reserve(): new_cap is too big, not enough memory to reserve");
+  };
+  if (new_cap > this->capacity()) {
+    this->reallocate(new_cap);
+  }
+}
+
+template<typename T, typename Allocator>
+Vector::size_type Vector<T, Allocator>::capacity() const noexcept {
+  return this->peak_ - this->head_;
+}
+
+template<typename T, typename Allocator>
+void Vector<T, Allocator>::shrink_to_fit() {
+  //TODO: do it later,
+}
+
+
 } //namespace truefinch template library
